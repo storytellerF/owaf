@@ -1,0 +1,12 @@
+listen_addr = "127.0.0.1:8008"
+
+[db]
+url = "file:./data/sqlx.sqlite"
+
+[jwt]
+secret = "yoursecret"
+expiry = 3600
+
+[log]
+file_name = "app.log"
+rolling = "daily"

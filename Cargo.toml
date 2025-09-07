@@ -1,0 +1,28 @@
+[package]
+name = "owaf"
+version = "0.1.1"
+edition = "2021"
+rust-version = "1.80"
+readme = "./README.md"
+
+[dependencies]
+anyhow = "1.0.79"
+figment = { version = "0.10.8", features = ["env", "toml"] }
+jsonwebtoken = "9.2.0"
+rust-embed = "8.0.0"
+salvo = {version = "0.76.0", features = ["full"]}
+serde = "1.0.196"
+thiserror = "2.0"
+time = "0.3.28"
+tokio = {version = "1", features = ["full"]}
+tracing = "0.1"
+validator = {version = "0.20", features = ["derive"]}
+ulid = "1.1"
+argon2 = "0.5"
+cookie = "0.18.0"
+dotenvy = "0.15.0"
+tracing-appender ="0.2.3"
+tracing-subscriber = {version = "0.3.19", features = ["std", "fmt", "env-filter", "tracing-log", "time", "local-time", "json"]}
+sqlx = { version = "0.8", features = ["runtime-tokio", "macros", "sqlite"]}
+rinja = "0.3.5"
+rand = "0.8.3"

@@ -47,15 +47,9 @@ pub struct ServerConfig {
 
     pub db: DbConfig,
     pub log: LogConfig,
-    pub jwt: JwtConfig,
     pub tls: Option<TlsConfig>,
 }
 
-#[derive(Deserialize, Clone, Debug)]
-pub struct JwtConfig {
-    pub secret: String,
-    pub expiry: i64,
-}
 #[derive(Deserialize, Clone, Debug)]
 pub struct TlsConfig {
     pub cert: String,

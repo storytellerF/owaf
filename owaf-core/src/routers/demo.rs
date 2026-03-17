@@ -34,7 +34,7 @@ async fn handle(req: &mut Request, depot: &mut Depot, res: &mut Response) -> boo
         let target: &str;
         if host_without_port == "minio.example.com" {
             target = "http://localhost:9000";
-            req.headers_mut().insert(salvo::http::header::HOST, HeaderValue::from_static("http://localhost:9000"));
+            req.headers_mut().insert(salvo::http::header::HOST, HeaderValue::from_static("localhost:9000"));
         } else {
             return false;
         }

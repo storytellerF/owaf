@@ -1,0 +1,43 @@
+services:
+  main:
+    build:
+      context: ..
+      dockerfile: ./dev.Dockerfile
+      args:
+        - USER_NAME=${CONTAINER_USERNAME}
+    ports:
+      - "6080" # noVNC web interface
+      - "5901" # VNC direct connection
+      - "22" # ssh
+    environment:
+      - VNC_PASSWD=${VNC_PASSWD}
+      - VNC_GEOMETRY=1920x1080
+      - VNC_DEPTH=24
+      - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
+    volumes:
+      - ..:/workspace/owaf:cached
+      - ./data/authorized_keys:${CONTAINER_HOME}/.ssh/authorized_keys
+      - bash_history:${CONTAINER_HOME}/.rust-in-docker/.bash_history
+      - cargo_registry:${CONTAINER_HOME}/.cargo/registry
+      - chrome_cache:${CONTAINER_HOME}/.cache/google-chrome
+      - chrome_config:${CONTAINER_HOME}/.config/google-chrome
+      - google_cache:${CONTAINER_HOME}/.cache/Google
+      - google_config:${CONTAINER_HOME}/.config/Google
+      - google_local:${CONTAINER_HOME}/.local/share/Google
+      - antigravity_config:${CONTAINER_HOME}/.config/Antigravity
+      - gemini_data:${CONTAINER_HOME}/.gemini
+      - antigravity_data:${CONTAINER_HOME:-/home/debian}/.antigravity
+    shm_size: '2gb'
+    privileged: true # Enable KVM acceleration
+
+volumes:
+  bash_history:
+  cargo_registry:
+  chrome_cache:
+  chrome_config:
+  google_cache:
+  google_config:
+  google_local:
+  antigravity_config:
+  gemini_data:
+  antigravity_data:

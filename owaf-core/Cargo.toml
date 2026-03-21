@@ -24,11 +24,11 @@ cookie = "0.18.0"
 dotenvy = "0.15.0"
 tracing-appender ="0.2.3"
 tracing-subscriber = {version = "0.3.19", features = ["std", "fmt", "env-filter", "tracing-log", "time", "local-time", "json"]}
-sqlx = { version = "0.8", features = ["runtime-tokio", "macros", "sqlite"]}
+sqlx = { version = "0.8", features = ["runtime-tokio", "macros", "sqlite", "mysql"]}
 rinja = "0.3.5"
 rand = "0.8.3"
 
 [dev-dependencies]
 testcontainers = "0.23.1"
-testcontainers-modules = { version = "0.11.2", features = ["minio"] }
+testcontainers-modules = { version = "0.11.2", features = ["minio", "mysql"] }
 reqwest = "0.12"

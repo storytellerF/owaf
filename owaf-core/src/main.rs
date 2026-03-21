@@ -170,4 +170,46 @@ mod tests {
         // If the proxy fails to reach it, it would be 502 or something.
         assert_eq!(status, salvo::http::StatusCode::FORBIDDEN);
     }
+
+    #[tokio::test]
+    async fn test_mysql_proxy() {
+        use std::env;
+        use testcontainers::{runners::AsyncRunner, ImageExt};
+        use testcontainers_modules::mysql::Mysql;
+        
+        setup_test_env();
+        
+        if crate::db::SQLX_POOL.get().is_none() {
+            let db_config = &crate::config::get().db;
+            let sqlx_pool = sqlx::SqlitePool::connect(&db_config.url).await.unwrap();
+            if crate::db::SQLX_POOL.set(sqlx_pool).is_ok() {
+                let pool = crate::db::pool();
+                sqlx::migrate!("./migrations").run(pool).await.unwrap();
+            }
+        }
+        
+        let mysql_image = Mysql::default()
+            .with_env_var("MYSQL_DATABASE", "test")
+            .with_env_var("MYSQL_USER", "test")
+            .with_env_var("MYSQL_PASSWORD", "test")
+            .with_env_var("MYSQL_ROOT_PASSWORD", "test");
+            
+        let node = mysql_image.start().await.unwrap();
+        let host_port = node.get_host_port_ipv4(3306).await.unwrap();
+        let mysql_url = format!("http://127.0.0.1:{}", host_port);
+        env::set_var("MYSQL_URL", &mysql_url);
+
+        let service = Service::new(crate::routers::root());
+
+        let res = TestClient::get("http://mysql.example.com/")
+            .add_header("Host", "mysql.example.com", true)
+            .send(&service)
+            .await;
+
+        assert!(res.status_code.is_some());
+        let status = res.status_code.unwrap();
+        // Since we are HTTP-proxying to a non-HTTP MySQL socket, it should drop the connection or fail parsing,
+        // resulting in 500 Internal Server Error (or possibly 502 Bad Gateway depending on reqwest error handling).
+        assert_eq!(status, salvo::http::StatusCode::INTERNAL_SERVER_ERROR);
+    }
 }

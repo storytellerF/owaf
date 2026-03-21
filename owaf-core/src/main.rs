@@ -101,7 +101,7 @@ async fn shutdown_signal(handle: ServerHandle) {
 #[cfg(test)]
 mod tests {
     use salvo::prelude::*;
-    use salvo::test::{ResponseExt, TestClient};
+    use salvo::test::TestClient;
 
     use crate::config;
 
@@ -133,7 +133,7 @@ mod tests {
     #[tokio::test]
     async fn test_minio_proxy() {
         use std::env;
-        use testcontainers::{runners::AsyncRunner, ImageExt};
+        use testcontainers::runners::AsyncRunner;
         use testcontainers_modules::minio::MinIO;
         
         setup_test_env();

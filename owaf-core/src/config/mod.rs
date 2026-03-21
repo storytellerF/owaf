@@ -9,7 +9,7 @@ pub use log_config::LogConfig;
 mod db_config;
 pub use db_config::DbConfig;
 mod proxy_config;
-pub use proxy_config::{ProxyConfig, ProxyEntry};
+pub use proxy_config::ProxyConfig;
 
 pub static CONFIG: OnceLock<ServerConfig> = OnceLock::new();
 pub static PROXY_CONFIG: OnceLock<ProxyConfig> = OnceLock::new();

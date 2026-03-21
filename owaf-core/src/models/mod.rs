@@ -2,6 +2,7 @@ use salvo::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::*;
 
+#[allow(dead_code)]
 #[derive(FromRow, Serialize, Deserialize, Extractible, Debug)]
 #[salvo(extract(default_source(from = "body", parse = "json")))]
 pub struct User {
@@ -11,6 +12,7 @@ pub struct User {
     pub password: String,
 }
 
+#[allow(dead_code)]
 #[derive(FromRow, Serialize, ToSchema, Debug)]
 pub struct SafeUser {
     pub id: String,

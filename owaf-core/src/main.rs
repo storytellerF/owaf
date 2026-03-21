@@ -105,9 +105,19 @@ mod tests {
 
     use crate::config;
 
+    static INIT: std::sync::Once = std::sync::Once::new();
+
+    pub fn setup_test_env() {
+        INIT.call_once(|| {
+            std::env::set_var("APP_LISTEN_ADDR", "127.0.0.1:0");
+            std::env::set_var("DATABASE_URL", "sqlite::memory:");
+            crate::config::init();
+        });
+    }
+
     #[tokio::test]
     async fn test_hello_world() {
-        config::init();
+        setup_test_env();
 
         let service = Service::new(crate::routers::root());
 
@@ -121,5 +131,46 @@ mod tests {
         .await
         .unwrap();
         assert_eq!(content, "Hello World from salvo");
+    }
+
+    #[tokio::test]
+    async fn test_minio_proxy() {
+        use std::env;
+        use testcontainers::{runners::AsyncRunner, ImageExt};
+        use testcontainers_modules::minio::MinIO;
+        
+        setup_test_env();
+        
+        // Note: db::init sets SQLX_POOL. If test_hello_world runs concurrently, it will fail if it tries to init db without url.
+        // We will initialize db pool here (using OnceLock properties).
+        if crate::db::SQLX_POOL.get().is_none() {
+            let db_config = &crate::config::get().db;
+            let sqlx_pool = sqlx::SqlitePool::connect(&db_config.url).await.unwrap();
+            if crate::db::SQLX_POOL.set(sqlx_pool).is_ok() {
+                // run migrations for the sqlite memory db
+                let pool = crate::db::pool();
+                sqlx::migrate!("./migrations").run(pool).await.unwrap();
+            }
+        }
+        
+        // Start testcontainer minio
+        let minio_image = MinIO::default();
+        let node = minio_image.start().await.unwrap();
+        let host_port = node.get_host_port_ipv4(9000).await.unwrap();
+        let minio_url = format!("http://127.0.0.1:{}", host_port);
+        env::set_var("MINIO_URL", &minio_url);
+
+        let service = Service::new(crate::routers::root());
+
+        let res = TestClient::get("http://minio.example.com/some/path")
+            .add_header("Host", "minio.example.com", true)
+            .send(&service)
+            .await;
+
+        assert!(res.status_code.is_some());
+        let status = res.status_code.unwrap();
+        // Since it's a proxy reaching MinIO without auth, it will normally return 403.
+        // If the proxy fails to reach it, it would be 502 or something.
+        assert_eq!(status, salvo::http::StatusCode::FORBIDDEN);
     }
 }

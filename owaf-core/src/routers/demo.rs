@@ -48,6 +48,16 @@ async fn handle(req: &mut Request, depot: &mut Depot, res: &mut Response) -> boo
                 let host_val = host_val.strip_prefix("https://").unwrap_or(host_val);
                 req.headers_mut().insert(salvo::http::header::HOST, HeaderValue::from_str(host_val).unwrap());
                 found = true;
+                if let Some(rate_limit) = &entry.rate_limit {
+                    let ip = req.remote_addr().to_string();
+                    let limiter = crate::utils::rate_limit::get_limiter();
+                    if !limiter.check(&entry.host, &ip, rate_limit.requests, rate_limit.window_sec) {
+                        res.status_code(salvo::http::StatusCode::FORBIDDEN);
+                        res.render("Rate limit exceeded");
+                        return true;
+                    }
+                }
+                
                 break;
             }
         }

@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "owaf-core",
+    "owaf-server",
+    "owaf-dashboard"
+]
+resolver = "2"

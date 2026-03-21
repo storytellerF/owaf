@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logs Dashboard</title>
+  </head>
+  {% include "log_list_frag.html" %}
+  <script src="/assets/js/tailwindcss.js" defer></script>
+  <script src="/assets/js/alpinejs.js" defer></script>
+  <script>
+    function logForm() {
+      return {
+        logs: [],
+        fetchData() {
+          fetch(`http://127.0.0.1:8009/api/log`)
+            .then((response) => response.json())
+            .then((data) => {
+              this.logs = data;
+            })
+            .catch((error) => console.error("Error fetching logs:", error));
+        }
+      };
+    }
+  </script>
+</html>

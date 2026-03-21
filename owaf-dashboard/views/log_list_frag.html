@@ -1,0 +1,39 @@
+<div id="app" x-data="logForm" x-init="fetchData()" class="bg-gradient-to-br from-gray-800 via-gray-900 to-black min-h-screen">
+  <div class="px-4 sm:px-6 lg:px-8 py-8">
+    <div class="sm:flex sm:items-center">
+      <div class="sm:flex-auto">
+        <h1 class="text-3xl font-bold leading-6 text-white tracking-tight">Logs Dashboard</h1>
+        <p class="mt-2 text-sm text-gray-400">Live feed of all proxy access logs.</p>
+      </div>
+      <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+        <button @click="fetchData()" class="block rounded-lg bg-indigo-500 px-4 py-2 font-semibold text-white shadow-lg hover:bg-indigo-400 transition-colors">
+          Refresh
+        </button>
+      </div>
+    </div>
+    <div class="mt-8 flex flex-col">
+      <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+          <div class="overflow-hidden shadow ring-1 ring-white/10 md:rounded-xl">
+            <table class="min-w-full divide-y divide-gray-800">
+              <thead class="bg-gray-900">
+                <tr>
+                  <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-white sm:pl-6 w-16">ID</th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white">Message</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-800 bg-gray-900/50">
+                <template x-for="log in logs" :key="log.id">
+                  <tr class="hover:bg-gray-800 transition-colors">
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-300 sm:pl-6 leading-relaxed" x-text="log.id"></td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-400 font-mono tracking-wide" x-text="log.message"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

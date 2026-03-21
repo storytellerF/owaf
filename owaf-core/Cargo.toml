@@ -8,6 +8,7 @@ readme = "./README.md"
 [dependencies]
 anyhow = "1.0.79"
 figment = { version = "0.10.8", features = ["env", "toml"] }
+hcl-rs = "0.19.6"
 jsonwebtoken = "9.2.0"
 rust-embed = "8.0.0"
 salvo = {version = "0.76.0", features = ["full"]}

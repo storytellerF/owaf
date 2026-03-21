@@ -31,13 +31,28 @@ async fn handle(req: &mut Request, depot: &mut Depot, res: &mut Response) -> boo
         )
         .execute(conn)
         .await;
-        let target: String;
-        if host_without_port == "minio.example.com" {
-            target = std::env::var("MINIO_URL").unwrap_or_else(|_| "http://localhost:9000".to_string());
-            let host_val = target.strip_prefix("http://").unwrap_or(&target);
-            let host_val = host_val.strip_prefix("https://").unwrap_or(host_val);
-            req.headers_mut().insert(salvo::http::header::HOST, HeaderValue::from_str(host_val).unwrap());
-        } else {
+        let mut target = String::new();
+        let proxy_config = crate::config::get_proxy();
+        let mut found = false;
+        
+        for (_, entry) in &proxy_config.proxy {
+            if entry.host == host_without_port {
+                target = entry.target.clone();
+                // Basic env variable expansion
+                if target.starts_with("${") && target.ends_with("}") {
+                    let env_var = &target[2..target.len()-1];
+                    target = std::env::var(env_var).unwrap_or(target);
+                }
+                
+                let host_val = target.strip_prefix("http://").unwrap_or(&target);
+                let host_val = host_val.strip_prefix("https://").unwrap_or(host_val);
+                req.headers_mut().insert(salvo::http::header::HOST, HeaderValue::from_str(host_val).unwrap());
+                found = true;
+                break;
+            }
+        }
+        
+        if !found {
             return false;
         }
         let upstream = format!("{}/{}?{}", target, rest, query);

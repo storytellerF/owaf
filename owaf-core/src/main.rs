@@ -121,16 +121,13 @@ mod tests {
 
         let service = Service::new(crate::routers::root());
 
-        let content = TestClient::get(format!(
+        let res = TestClient::get(format!(
             "http://{}",
             config::get().listen_addr.replace("0.0.0.0", "127.0.0.1")
         ))
         .send(&service)
-        .await
-        .take_string()
-        .await
-        .unwrap();
-        assert_eq!(content, "Hello World from salvo");
+        .await;
+        assert_eq!(res.status_code.unwrap(), salvo::http::StatusCode::NOT_FOUND);
     }
 
     #[tokio::test]

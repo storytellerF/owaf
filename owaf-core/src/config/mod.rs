@@ -8,8 +8,11 @@ mod log_config;
 pub use log_config::LogConfig;
 mod db_config;
 pub use db_config::DbConfig;
+mod proxy_config;
+pub use proxy_config::{ProxyConfig, ProxyEntry};
 
 pub static CONFIG: OnceLock<ServerConfig> = OnceLock::new();
+pub static PROXY_CONFIG: OnceLock<ProxyConfig> = OnceLock::new();
 
 pub fn init() {
     let raw_config = Figment::new()
@@ -35,9 +38,26 @@ pub fn init() {
     crate::config::CONFIG
         .set(config)
         .expect("config should be set");
+
+    let proxy_path = std::env::var("PROXY_CONFIG").unwrap_or_else(|_| "proxy.hcl".to_string());
+    let proxy_config = if let Ok(content) = std::fs::read_to_string(&proxy_path) {
+        hcl::from_str(&content).unwrap_or_else(|e| {
+            eprintln!("Failed to parse proxy config {}: {}", proxy_path, e);
+            ProxyConfig::default()
+        })
+    } else {
+        ProxyConfig::default()
+    };
+    crate::config::PROXY_CONFIG
+        .set(proxy_config)
+        .expect("proxy config should be set");
 }
 pub fn get() -> &'static ServerConfig {
     CONFIG.get().expect("config should be set")
+}
+
+pub fn get_proxy() -> &'static ProxyConfig {
+    PROXY_CONFIG.get().expect("proxy config should be set")
 }
 
 #[derive(Deserialize, Clone, Debug)]
